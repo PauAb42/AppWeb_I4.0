@@ -9,3 +9,10 @@ export const generateAccessToken = (userId: string) => {
     { expiresIn: '15m' }
   );
 };
+
+
+// Ejemplo de uso
+const userId = 'abc123';
+const accessToken = generateAccessToken(userId);
+
+console.log('Access Token:', accessToken);

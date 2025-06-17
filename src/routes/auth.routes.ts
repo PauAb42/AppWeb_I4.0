@@ -1,5 +1,6 @@
 import { Response, Router, Request } from "express";
-import { createUser, getAllUsers, getTime, getUserName, login, updateTime } from "../controllers/auth.controller";
+import { createUser, deleteUser, getAllUsers, getTime, getUserName, login, updateTime, updateUser } from "../controllers/auth.controller";
+import { createOrder } from "../controllers/order.controller";
 
 const router = Router();
 
@@ -27,4 +28,18 @@ router.post("/user", (req: Request, res: Response) => {
     createUser(req, res);
 });
 
+
+
+// Actualizar usuario (baja lógica y cambios)
+router.patch('/user/:id', (req, res, next) => {
+  updateUser(req, res).catch(next);
+});
+//router.patch('/user/:id',updateUser);
+
+// Baja lógica de usuario
+router.delete('/user/:id', (req, res, next) => {
+  deleteUser(req, res).catch(next);
+});
+//router.delete('/user/:id',deleteUser);
 export default router;
+

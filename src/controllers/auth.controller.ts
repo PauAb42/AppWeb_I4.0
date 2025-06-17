@@ -5,8 +5,6 @@ import dayjs from "dayjs";
 import { User } from "../models/User";
 import bcrypt from 'bcrypt';
 
-
-
 //IMPORTANTE
 export const login = (req:Request, res:Response) => {
     //name:string asigno tipo de dato
@@ -71,9 +69,8 @@ export const updateTime = (req: Request, res: Response) =>{
 }
 
 export const getAllUsers = async (req: Request, res: Response) => {
-    const userList= await User.find() //Buscar todos los registros
+    const userList= await User.find({status:true}) //Buscar todos los registros
     //const userList= await User.find({status:false}) //Buscar todos los registros activos
-    
     return res.json({ userList })
 }
 
@@ -92,7 +89,7 @@ export const getUserName = async (req:Request,res:Response) => {
     }
 };
 
-
+//Crear un nuevo usuario
 export const createUser = async (req:Request, res:Response) => {
     try {
         const { username, password, email, role } = req.body;
@@ -116,4 +113,51 @@ export const createUser = async (req:Request, res:Response) => {
         console.log("Error ocurrido en createUser: ", error);
         return res.status(426).json({ error });
     }
+};
+
+//CRUD COMPLETO DE USUARIOS
+//Actualizar un usuario
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // Sólo permitimos actualizar campos concretos
+    const { username, email, role, password } = req.body;
+    const updates: Partial<{ username: string; email: string; role: string; password: string }> = {};
+
+    if (username) updates.username = username;
+    if (email)    updates.email    = email;
+    if (role)     updates.role     = role;
+    if (password) updates.password = password;
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+    return res.json({ message: "Usuario actualizado.", user });
+  } catch (err: any) {
+    console.error("Error updateUser:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+//Eliminar un usuario
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    user.status = false;
+    await user.save();
+    return res.json({ message: "Usuario dado de baja (status=false).", user }); //marca status = false
+  } catch (err: any) {
+    console.error("Error deleteUser:", err);
+    return res.status(500).json({ message: err.message });
+  }
 };
